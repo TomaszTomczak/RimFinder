@@ -3,3 +3,11 @@ OpenCV: https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html
 there were some problems with installing jasper via apt-get:
 https://askubuntu.com/questions/1145811/error-installing-libjasper-dev-and-libpng12-package-in-ubuntu-19-04
 https://stackoverflow.com/questions/43484357/opencv-in-ubuntu-17-04/48326450#48326450
+
+sudo apt update
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install libopencv-dev
+sudo apt-get install libopencv-highgui-dev
+
+g++ main.cpp -o img-display `pkg-config --cflags --libs opencv`
