@@ -21,6 +21,9 @@ https://stackoverflow.com/questions/17087446/how-to-calculate-perspective-transf
 https://docs.opencv.org/2.4/modules/imgproc/doc/geometric_transformations.html
 https://www.pyimagesearch.com/2016/02/08/opencv-shape-detection/
 
+road sign recognition (pl)
+http://pe.org.pl/articles/2016/1/10.pdf
+
 youtube:
 https://pysource.com/2018/12/29/real-time-shape-detection-opencv-with-python-3/
 https://www.youtube.com/watch?v=A4UDOAOTRdw
