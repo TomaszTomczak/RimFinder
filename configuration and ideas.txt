@@ -28,3 +28,5 @@ youtube:
 https://pysource.com/2018/12/29/real-time-shape-detection-opencv-with-python-3/
 https://www.youtube.com/watch?v=A4UDOAOTRdw
 
+
+It is time to start to learn something about machine learning.
