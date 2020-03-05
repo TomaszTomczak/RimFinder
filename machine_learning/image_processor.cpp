@@ -6,7 +6,7 @@
 
 using namespace cv;
 
-
+//TODO: implement Gabor filters, histogram and set every image to the same size
 Vec3f findBiggestCircle(const Mat& mat)
 {
     for(float i=2.0; i<=10.0; i+=0.1)
