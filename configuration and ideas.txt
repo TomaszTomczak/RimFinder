@@ -11,6 +11,7 @@ sudo apt-get install libopencv-dev
 sudo apt-get install libopencv-highgui-dev
 
 g++ main.cpp -o img-display `pkg-config --cflags --libs opencv`
+- new source under machine learning
 
 
 Useful stuff:
