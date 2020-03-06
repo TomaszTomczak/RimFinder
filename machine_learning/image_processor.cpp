@@ -25,6 +25,7 @@ Vec3f findBiggestCircle(const Mat& mat)
 int main(int argc, char** argv)
 {
   Mat src, src_gray;
+  //Mat src2 = Mat()
 
   /// Read the image
   src = imread( argv[1], 1 );
@@ -32,6 +33,13 @@ int main(int argc, char** argv)
   if( !src.data )
     { return -1; }
 
+    
+    if(src.rows > 500) // resize iamge
+    {
+      float ratio = src.rows/src.cols;
+      resize(src,src,Size(500, 500*ratio));
+    }
+//resize(src,src,Size(500, 500*ratio));
   /// Convert it to gray
   cvtColor( src, src_gray, CV_BGR2GRAY );
 
@@ -55,9 +63,21 @@ int beta = 0;
   std::vector<Vec3f> mainCircles;
 
   /// Apply the Hough Transform to find the circles
- // HoughCircles( src_gray, circles, CV_HOUGH_GRADIENT, 1, /*src_gray.rows/8*/50, 100, 100, src_gray.rows/2.5, 0 );
+  // HoughCircles( src_gray, circles, CV_HOUGH_GRADIENT, 1, /*src_gray.rows/8*/50, 200, 35, 0, 0 );
 
-    circles.push_back(findBiggestCircle(src_gray));
+   // circles.push_back(findBiggestCircle(src_gray));
+  
+   Vec3f rimEdge = findBiggestCircle(src_gray);
+
+
+      int x = rimEdge[0] - rimEdge[2]; 
+      int y = rimEdge[1] - rimEdge[2]; 
+      int widthandheight = rimEdge[2] * 2;
+      Rect imageRoi(x,y,widthandheight, widthandheight ); // region of interests
+
+
+    src_gray = src_gray(imageRoi);
+    src = src(imageRoi);
 
   /// Draw the circles detected
   for( size_t i = 0; i < circles.size(); i++ )
