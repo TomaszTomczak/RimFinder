@@ -39,6 +39,7 @@ Mat calculateHistogram(Mat1b const &image)
   return hist;
 }
 
+//TODO: it should be calculated based on data in the area of rim cirgle
 void drawHistogram(const Mat &hist, int bins)
 {
   int const hist_height = 256;
