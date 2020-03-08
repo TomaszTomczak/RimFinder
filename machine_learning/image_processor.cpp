@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <vector>
+#include <math.h>
 
 using namespace cv;
 
@@ -21,7 +22,32 @@ Vec3f findBiggestCircle(const Mat &mat)
   return (0.0, 0.0, 0.0);
 }
 
-Mat calculateHistogram(Mat1b const &image)
+Mat calculateHistogramInCircleArea(const Mat1b& image, const Vec3f& circle)
+{
+  int histogram[256];
+  Mat m(1,256,CV_32S,Scalar(0));
+
+  std::cout<<"m: "<<m<<std::endl;
+
+  for (int y = 0; y < image.rows; y++)
+  {
+    for (int x = 0; x < image.cols; x++)
+    {
+      float distance = sqrt(pow(x-circle[0],2)+pow(y-circle[1],2));
+      //if(distance <= circle[2])
+      {
+        //histogram[image.at<uchar>(y, x)]++;
+        //(image.at<uchar>(x,y)) ++;
+        m.at<int>(image.at<uchar>(x,y)) ++;
+      }
+    }
+  }
+  std::cout<<"m: "<<m<<std::endl;
+
+  return m;
+}
+
+Mat calculateHistogram(const Mat1b& image)
 {
 
   int bins = 256;
@@ -43,13 +69,16 @@ Mat calculateHistogram(Mat1b const &image)
 void drawHistogram(const Mat &hist, int bins)
 {
   int const hist_height = 256;
+  std::cout<<"histogram data: "<<hist<<std::endl;
   cv::Mat3b hist_image = cv::Mat3b::zeros(hist_height, bins);
   double max_val = 0;
   minMaxLoc(hist, 0, &max_val);
 
+  std::cout<<std::endl<<"max val: "<<max_val<<std::endl;
+
   for (int b = 0; b < bins; b++)
   {
-    float const binVal = hist.at<float>(b);
+    float const binVal = hist.at<int>(b);
     int const height = cvRound(binVal * hist_height / max_val);
     cv::line(hist_image, cv::Point(b, hist_height - height), cv::Point(b, hist_height), cv::Scalar::all(255));
   }
@@ -107,10 +136,14 @@ int main(int argc, char **argv)
 
   Vec3f rimEdge = findBiggestCircle(src_gray);
 
+//calculateHistogramInCircleArea(src_gray, rimEdge);
+
   int x = rimEdge[0] - rimEdge[2];
   int y = rimEdge[1] - rimEdge[2];
   int widthandheight = rimEdge[2] * 2;
   Rect imageRoi(x, y, widthandheight, widthandheight); // region of interests
+
+  rimEdge = Vec3f(widthandheight/2, widthandheight/2, widthandheight/2); //move detected circle to new location after image crop
 
   src_gray = src_gray(imageRoi);
   src = src(imageRoi);
@@ -128,11 +161,30 @@ int main(int argc, char **argv)
 
   /// Show your results
   //namedWindow( "Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE );
+ for (int y = 0; y < src.rows; y++)
+  {
+    for (int x = 0; x < src.cols; x++)
+    {
+      float distance = sqrt(pow(x-rimEdge[0],2)+pow(y-rimEdge[1],2));
+      if(distance <= rimEdge[2])
+      {
+        //histogram[image.at<uchar>(y, x)]++;
+        //(image.at<uchar>(x,y)) ++;
+       // m.at<int>(image.at<uchar>(x,y)) ++;
+       src.at<Vec3b>(x,y)[0] = 255;
+      }
+    }
+  }
+
   imshow("Hough Circle Transform Demo", src);
   waitKey();
   imshow("Hough Circle gray", src_gray);
   waitKey();
   drawHistogram(calculateHistogram(src_gray), 256);
+  
+  waitKey();
+  drawHistogram(calculateHistogramInCircleArea(src_gray, rimEdge), 256);
+
   waitKey(0);
   return 0;
 }
