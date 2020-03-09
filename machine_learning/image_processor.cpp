@@ -25,7 +25,7 @@ Vec3f findBiggestCircle(const Mat &mat)
 Mat calculateHistogramInCircleArea(const Mat1b& image, const Vec3f& circle)
 {
   int histogram[256];
-  Mat m(1,256,CV_32S,Scalar(0));
+  Mat m(1,256,CV_32F ,Scalar(0));
 
   std::cout<<"m: "<<m<<std::endl;
 
@@ -34,7 +34,7 @@ Mat calculateHistogramInCircleArea(const Mat1b& image, const Vec3f& circle)
     for (int x = 0; x < image.cols; x++)
     {
       float distance = sqrt(pow(x-circle[0],2)+pow(y-circle[1],2));
-      //if(distance <= circle[2])
+      if(distance <= circle[2])
       {
         //histogram[image.at<uchar>(y, x)]++;
         //(image.at<uchar>(x,y)) ++;
@@ -66,7 +66,7 @@ Mat calculateHistogram(const Mat1b& image)
 }
 
 //TODO: it should be calculated based on data in the area of rim cirgle
-void drawHistogram(const Mat &hist, int bins)
+void drawHistogram(const Mat &hist, int bins, std::string title)
 {
   int const hist_height = 256;
   std::cout<<"histogram data: "<<hist<<std::endl;
@@ -78,11 +78,11 @@ void drawHistogram(const Mat &hist, int bins)
 
   for (int b = 0; b < bins; b++)
   {
-    float const binVal = hist.at<int>(b);
+    float const binVal = hist.at<float>(b);
     int const height = cvRound(binVal * hist_height / max_val);
     cv::line(hist_image, cv::Point(b, hist_height - height), cv::Point(b, hist_height), cv::Scalar::all(255));
   }
-  cv::imshow("histogram", hist_image);
+  cv::imshow(title, hist_image);
 }
 
 /** @function main */
@@ -99,9 +99,11 @@ int main(int argc, char **argv)
     return -1;
   }
 
+
   if (src.rows > 500) // resize iamge
   {
-    float ratio = src.rows / src.cols;
+    float ratio = (float) src.rows / src.cols;
+    std::cout<<"ratio: "<<ratio<<std::endl;
     resize(src, src, Size(500, 500 * ratio));
   }
   //resize(src,src,Size(500, 500*ratio));
@@ -149,7 +151,7 @@ int main(int argc, char **argv)
   src = src(imageRoi);
 
   /// Draw the circles detected
-  for (size_t i = 0; i < circles.size(); i++)
+ /* for (size_t i = 0; i < circles.size(); i++)
   {
     Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
     int radius = cvRound(circles[i][2]);
@@ -157,11 +159,11 @@ int main(int argc, char **argv)
     circle(src, center, 3, Scalar(0, 255, 0), -1, 8, 0);
     // circle outline
     circle(src, center, radius, Scalar(0, 0, 255), 3, 8, 0);
-  }
+  }*/
 
   /// Show your results
   //namedWindow( "Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE );
- for (int y = 0; y < src.rows; y++)
+ /*for (int y = 0; y < src.rows; y++)
   {
     for (int x = 0; x < src.cols; x++)
     {
@@ -174,17 +176,28 @@ int main(int argc, char **argv)
        src.at<Vec3b>(x,y)[0] = 255;
       }
     }
-  }
+  }*/
 
   imshow("Hough Circle Transform Demo", src);
   waitKey();
   imshow("Hough Circle gray", src_gray);
-  waitKey();
-  drawHistogram(calculateHistogram(src_gray), 256);
-  
-  waitKey();
-  drawHistogram(calculateHistogramInCircleArea(src_gray, rimEdge), 256);
+  //waitKey();
+  //drawHistogram(calculateHistogram(src_gray), 256, "1");
 
+
+
+  waitKey();
+  Mat tmp;
+  cvtColor(src, tmp, CV_BGR2GRAY);
+  imshow("greycale without normalization", tmp);
+  //std::cout<<"without normalization: "<<tmp<<std::endl;
+  waitKey();
+  drawHistogram(calculateHistogramInCircleArea(tmp, rimEdge), 256, "histogram od circle without normalization");
+  Mat tmp2;
+  normalize(tmp, tmp2, 0,255, NORM_MINMAX);
+  imshow("normalized image", tmp2);
+  //std::cout<<"with normalization: "<<tmp2<<std::endl;
+  drawHistogram(calculateHistogramInCircleArea(tmp2, rimEdge), 256, "3");
   waitKey(0);
   return 0;
 }
