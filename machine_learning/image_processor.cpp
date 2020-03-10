@@ -4,8 +4,74 @@
 #include <stdio.h>
 #include <vector>
 #include <math.h>
+#include <Modifier.hpp>
+#include <Classifier.hpp>
+#include <memory>
 
 using namespace cv;
+
+class Alg
+{
+  public:
+  static void resizeImg(Mat& src, int maxsize)
+  {
+    if (src.rows > maxsize) // resize iamge
+    {
+      float ratio = (float)src.rows / src.cols;
+      std::cout << "ratio: " << ratio << std::endl;
+      resize(src, src, Size(maxsize, maxsize * ratio));
+    }
+  }
+
+  static Vec3f findBiggestCircle(const Mat &mat)
+  {
+
+    for (float i = 2.0; i <= 10.0; i += 0.1)
+    {
+      std::vector<Vec3f> circles;
+      HoughCircles(mat, circles, CV_HOUGH_GRADIENT, 1, /*src_gray.rows/8*/ 50, 100, 100, mat.rows / i, 0);
+      if (circles.size() > 0)
+      {
+        return circles.front();
+      }
+    }
+    return (0.0, 0.0, 0.0);
+  }
+};
+
+class ImageProcessor
+{
+public:
+  virtual void load(std::string path) = 0;
+  virtual void process() = 0;
+  virtual std::vector<int> getProcessedData() = 0;
+  ~ImageProcessor() = default;
+};
+
+class RimHistogramImageProcessor : public ImageProcessor
+{
+
+public:
+  RimHistogramImageProcessor()
+  {
+  }
+  void load(std::string path) override
+  {
+    src = imread(path, 1);
+  };
+
+  void process() override
+  {
+    Alg::re
+  };
+  std::vector<int> getProcessedData() override{};
+
+private:
+  Mat src;
+  Mat src_greyscale;
+  std::vector<std::unique_ptr<Modifier>> modifiers;
+  std::unique_ptr<Classifier> classifier;
+};
 
 //TODO: implement Gabor filters, histogram and set every image to the same size
 Vec3f findBiggestCircle(const Mat &mat)
@@ -22,32 +88,32 @@ Vec3f findBiggestCircle(const Mat &mat)
   return (0.0, 0.0, 0.0);
 }
 
-Mat calculateHistogramInCircleArea(const Mat1b& image, const Vec3f& circle)
+Mat calculateHistogramInCircleArea(const Mat1b &image, const Vec3f &circle)
 {
   int histogram[256];
-  Mat m(1,256,CV_32F ,Scalar(0));
+  Mat m(1, 256, CV_32F, Scalar(0));
 
-  std::cout<<"m: "<<m<<std::endl;
+  std::cout << "m: " << m << std::endl;
 
   for (int y = 0; y < image.rows; y++)
   {
     for (int x = 0; x < image.cols; x++)
     {
-      float distance = sqrt(pow(x-circle[0],2)+pow(y-circle[1],2));
-      if(distance <= circle[2])
+      float distance = sqrt(pow(x - circle[0], 2) + pow(y - circle[1], 2));
+      if (distance <= circle[2])
       {
         //histogram[image.at<uchar>(y, x)]++;
         //(image.at<uchar>(x,y)) ++;
-        m.at<int>(image.at<uchar>(x,y)) ++;
+        m.at<int>(image.at<uchar>(x, y))++;
       }
     }
   }
-  std::cout<<"m: "<<m<<std::endl;
+  std::cout << "m: " << m << std::endl;
 
   return m;
 }
 
-Mat calculateHistogram(const Mat1b& image)
+Mat calculateHistogram(const Mat1b &image)
 {
 
   int bins = 256;
@@ -69,12 +135,13 @@ Mat calculateHistogram(const Mat1b& image)
 void drawHistogram(const Mat &hist, int bins, std::string title)
 {
   int const hist_height = 256;
-  std::cout<<"histogram data: "<<hist<<std::endl;
+  std::cout << "histogram data: " << hist << std::endl;
   cv::Mat3b hist_image = cv::Mat3b::zeros(hist_height, bins);
   double max_val = 0;
   minMaxLoc(hist, 0, &max_val);
 
-  std::cout<<std::endl<<"max val: "<<max_val<<std::endl;
+  std::cout << std::endl
+            << "max val: " << max_val << std::endl;
 
   for (int b = 0; b < bins; b++)
   {
@@ -99,11 +166,10 @@ int main(int argc, char **argv)
     return -1;
   }
 
-
   if (src.rows > 500) // resize iamge
   {
-    float ratio = (float) src.rows / src.cols;
-    std::cout<<"ratio: "<<ratio<<std::endl;
+    float ratio = (float)src.rows / src.cols;
+    std::cout << "ratio: " << ratio << std::endl;
     resize(src, src, Size(500, 500 * ratio));
   }
   //resize(src,src,Size(500, 500*ratio));
@@ -138,20 +204,20 @@ int main(int argc, char **argv)
 
   Vec3f rimEdge = findBiggestCircle(src_gray);
 
-//calculateHistogramInCircleArea(src_gray, rimEdge);
+  //calculateHistogramInCircleArea(src_gray, rimEdge);
 
   int x = rimEdge[0] - rimEdge[2];
   int y = rimEdge[1] - rimEdge[2];
   int widthandheight = rimEdge[2] * 2;
   Rect imageRoi(x, y, widthandheight, widthandheight); // region of interests
 
-  rimEdge = Vec3f(widthandheight/2, widthandheight/2, widthandheight/2); //move detected circle to new location after image crop
+  rimEdge = Vec3f(widthandheight / 2, widthandheight / 2, widthandheight / 2); //move detected circle to new location after image crop
 
   src_gray = src_gray(imageRoi);
   src = src(imageRoi);
 
   /// Draw the circles detected
- /* for (size_t i = 0; i < circles.size(); i++)
+  /* for (size_t i = 0; i < circles.size(); i++)
   {
     Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
     int radius = cvRound(circles[i][2]);
@@ -163,7 +229,7 @@ int main(int argc, char **argv)
 
   /// Show your results
   //namedWindow( "Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE );
- /*for (int y = 0; y < src.rows; y++)
+  /*for (int y = 0; y < src.rows; y++)
   {
     for (int x = 0; x < src.cols; x++)
     {
@@ -184,8 +250,6 @@ int main(int argc, char **argv)
   //waitKey();
   //drawHistogram(calculateHistogram(src_gray), 256, "1");
 
-
-
   waitKey();
   Mat tmp;
   cvtColor(src, tmp, CV_BGR2GRAY);
@@ -194,7 +258,7 @@ int main(int argc, char **argv)
   waitKey();
   drawHistogram(calculateHistogramInCircleArea(tmp, rimEdge), 256, "histogram od circle without normalization");
   Mat tmp2;
-  normalize(tmp, tmp2, 0,255, NORM_MINMAX);
+  normalize(tmp, tmp2, 0, 255, NORM_MINMAX);
   imshow("normalized image", tmp2);
   //std::cout<<"with normalization: "<<tmp2<<std::endl;
   drawHistogram(calculateHistogramInCircleArea(tmp2, rimEdge), 256, "3");
