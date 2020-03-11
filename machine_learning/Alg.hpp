@@ -60,6 +60,32 @@ public:
 
     return m;
   }
+  static void drawHistogram(int *histogramData, int bins = 256, int hist_height = 256)
+  {
+    cv::Mat3b hist_image = cv::Mat3b::zeros(hist_height, bins);
+    double max_val = 0;
+    //minMaxLoc(*data, 0, &max_val);
+
+    for (int i = 0; i < 256; i++)
+    {
+      if (histogramData[i] >= max_val)
+      {
+
+        max_val = histogramData[i];
+      }
+    }
+
+    std::cout << std::endl
+              << "max val: " << max_val << std::endl;
+
+    for (int b = 0; b < bins; b++)
+    {
+      float const binVal = histogramData[b];
+      int const height = cvRound(binVal * hist_height / max_val);
+      cv::line(hist_image, cv::Point(b, hist_height - height), cv::Point(b, hist_height), cv::Scalar::all(255));
+    }
+    cv::imshow("histogram", hist_image);
+  }
   static void drawHistogram(const Mat &hist, int bins, std::string title)
   {
     int const hist_height = 256;

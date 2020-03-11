@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <vector>
+#include <list>
 #include <math.h>
 #include <memory>
 #include "Alg.hpp"
@@ -12,24 +13,39 @@ using namespace cv; // TODO: remove this in spare time
 class ImageProcessor
 {
 public:
-  virtual void load(std::string path) = 0;
+  virtual void addImage(std::string path) = 0;
   virtual void process() = 0;
   virtual std::vector<int> getProcessedData() = 0;
   ~ImageProcessor() = default;
 };
 
+
+
 class RimHistogramImageProcessor : public ImageProcessor
 {
+private:
+struct ProcessedImage
+{
+    ProcessedImage(std::string path) : path(path){}
 
+    std::string path;
+    bool processed = false;
+    int* data;
+};
 public:
   RimHistogramImageProcessor() = default;
-  void load(std::string path) override
+  void addImage(std::string path) override
   {
-    src = imread(path, 1);
+    ///src = imread(path, 1);
+    images.push_back(std::make_unique<ProcessedImage>(path));
   }
 
-  void process() override
+  void process() override // this method will be adapted to work in seperate thread
   {
+    for(auto& image : images)
+    {
+    Mat src = imread(image->path);
+    Mat src_grayscale;
     Alg::resizeImg(src, 500);
     Vec3f rimEdge = Alg::findBiggestCircle(src);
 
@@ -42,42 +58,16 @@ public:
     src = src(imageRoi);
     cvtColor(src, src_grayscale, CV_BGR2GRAY);
     normalize(src_grayscale, src_grayscale, 0, 255, NORM_MINMAX);
-    data = calculateHistogramInCircleArea(src_grayscale, rimEdge);
-    processed = true;
-    imshow("normalized greyscale", src_grayscale);
-    imshow("original", src);
-    drawHistogram(data);
+    image->data = calculateHistogramInCircleArea(src_grayscale, rimEdge);
+    image->processed = true;
+    imshow("normalized greyscale" + image->path, src_grayscale);
+    imshow("original" + image->path, src);
+    Alg::drawHistogram(image->data);
+    }
   }
   std::vector<int> getProcessedData() override{};
 
 private:
-  void drawHistogram(int *histogramData, int bins = 256, int hist_height = 256)
-  {
-
-    cv::Mat3b hist_image = cv::Mat3b::zeros(hist_height, bins);
-    double max_val = 0;
-    //minMaxLoc(*data, 0, &max_val);
-
-    for (int i = 0; i < 256; i++)
-    {
-      if (data[i] >= max_val)
-      {
-
-        max_val = data[i];
-      }
-    }
-
-    std::cout << std::endl
-              << "max val: " << max_val << std::endl;
-
-    for (int b = 0; b < bins; b++)
-    {
-      float const binVal = data[b];
-      int const height = cvRound(binVal * hist_height / max_val);
-      cv::line(hist_image, cv::Point(b, hist_height - height), cv::Point(b, hist_height), cv::Scalar::all(255));
-    }
-    cv::imshow("histogram", hist_image);
-  }
   int *calculateHistogramInCircleArea(const Mat1b &image, const Vec3f &circle)
   {
     int *histogram = new int[256];
@@ -102,17 +92,15 @@ private:
   }
 
 private:
-  Mat src;
-  Mat src_grayscale;
-  bool processed = false;
-  int *data;
+  std::list<std::unique_ptr<ProcessedImage>> images;
 };
 
 int main(int argc, char **argv)
 {
 
   ImageProcessor *imageProcessor = new RimHistogramImageProcessor();
-  imageProcessor->load(argv[1]);
+  imageProcessor->addImage(argv[1]);
+  imageProcessor->addImage("img_data/mercedes.jpg");
   imageProcessor->process();
   waitKey(0);
 
