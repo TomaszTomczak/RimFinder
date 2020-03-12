@@ -19,7 +19,9 @@ struct ProcessedImage
   RimHistogramImageProcessor() = default;
   void addImage(std::string path) override;  
   void process() override; 
-  std::vector<int> getProcessedData();
+
+  std::string getProcessedData() override;
+
 
 private:
   int *calculateHistogramInCircleArea(const cv::Mat1b &image, const cv::Vec3f &circle);

@@ -1,5 +1,7 @@
 #include "RimHistogramImageProcessor.hpp"
 #include "Alg.hpp"
+#include <type_traits>
+
 
 void RimHistogramImageProcessor::addImage(std::string path)
 {
@@ -32,7 +34,24 @@ void RimHistogramImageProcessor::process()
     }
   }
 
-  std::vector<int> RimHistogramImageProcessor::getProcessedData(){};
+  std::string RimHistogramImageProcessor::getProcessedData() 
+  {
+    std::ostringstream oss;
+     // it will be json in the future
+    for(auto& i : images)
+    {
+        oss<<"Path: ";
+        oss<<i->path;
+        oss<<"\n";  
+        oss<<"Data: [";
+        for(int x =0; x<256; x++)
+        {
+            oss<<i->data[x]<<" ";
+        }       
+        oss<<"]\n";
+    }
+    return oss.str();
+  };
 
   int* RimHistogramImageProcessor::calculateHistogramInCircleArea(const cv::Mat1b &image, const cv::Vec3f &circle)
   {

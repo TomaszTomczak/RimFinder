@@ -10,7 +10,10 @@ int main(int argc, char **argv)
   imageProcessor->addImage(argv[1]);
   imageProcessor->addImage("img_data/mercedes.jpg");
   imageProcessor->process();
+  
   cv::waitKey(0);
+
+  std::cout<<imageProcessor->getProcessedData();
 
   return 0;
 }
