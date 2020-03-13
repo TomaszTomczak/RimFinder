@@ -1,7 +1,5 @@
 #include "RimHistogramImageProcessor.hpp"
 #include "Alg.hpp"
-#include <type_traits>
-
 
 void RimHistogramImageProcessor::addImage(std::string path)
 {
@@ -38,6 +36,7 @@ void RimHistogramImageProcessor::process()
   {
     std::ostringstream oss;
      // it will be json in the future
+      // https://github.com/nlohmann/json
     for(auto& i : images)
     {
         oss<<"Path: ";
