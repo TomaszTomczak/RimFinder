@@ -1,5 +1,8 @@
 #include "RimHistogramImageProcessor.hpp"
 #include "Alg.hpp"
+#include "nlohmann/json.hpp"
+
+using json = nlohmann::json;
 
 void RimHistogramImageProcessor::addImage(std::string path)
 {
@@ -34,22 +37,38 @@ void RimHistogramImageProcessor::process()
 
   std::string RimHistogramImageProcessor::getProcessedData() 
   {
+    json j;
     std::ostringstream oss;
      // it will be json in the future
       // https://github.com/nlohmann/json
+    //json data = json::array([1,2,3,4]);
+
+   /* json jj;
+    jj["name"] = "nazwa";
+    jj["dane"] = {1,2,3,4,5,6,6};
+    j["items"].push_back(jj);
+    j["items"].push_back("data2");
+    j["items"].push_back("data3");*/
+
     for(auto& i : images)
     {
-        oss<<"Path: ";
+        json tmp;
+        json data;
+        tmp["name"] = i->path;
+        /*oss<<"Path: ";
         oss<<i->path;
         oss<<"\n";  
-        oss<<"Data: [";
+        oss<<"Data: [";*/
         for(int x =0; x<256; x++)
         {
-            oss<<i->data[x]<<" ";
-        }       
-        oss<<"]\n";
+            //oss<<i->data[x]<<" ";
+            tmp["data"].push_back(i->data[x]);
+        }       /*
+        oss<<"]\n";*/
+        j["items"].push_back(tmp);
     }
-    return oss.str();
+
+    return j.dump();
   };
 
   int* RimHistogramImageProcessor::calculateHistogramInCircleArea(const cv::Mat1b &image, const cv::Vec3f &circle)

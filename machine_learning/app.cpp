@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "RimHistogramImageProcessor.hpp"
 #include <opencv2/core/core.hpp>
+#include <fstream>
 
 int main(int argc, char **argv)
 {
@@ -13,7 +14,11 @@ int main(int argc, char **argv)
   
   cv::waitKey(0);
 
-  std::cout<<imageProcessor->getProcessedData();
+  //std::cout<<imageProcessor->getProcessedData();
+  std::ofstream myfile;
+  myfile.open ("images_data.json");
+  myfile << imageProcessor->getProcessedData();
+  myfile.close();
 
   return 0;
 }
