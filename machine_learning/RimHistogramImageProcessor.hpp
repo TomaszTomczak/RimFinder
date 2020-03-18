@@ -13,7 +13,7 @@ struct ProcessedImage
 
     std::string path;
     bool processed = false;
-    int* data;
+    double* data;
 };
 
   RimHistogramImageProcessor() = default;
@@ -24,7 +24,7 @@ struct ProcessedImage
 
 
 private:
-  int *calculateHistogramInCircleArea(const cv::Mat1b &image, const cv::Vec3f &circle);
+  double *calculateHistogramInCircleArea(const cv::Mat1b &image, const cv::Vec3f &circle);
   
 private:
   std::list<std::unique_ptr<ProcessedImage>> images;

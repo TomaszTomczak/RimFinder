@@ -10,8 +10,13 @@ sudo apt-get upgrade
 sudo apt-get install libopencv-dev
 sudo apt-get install libopencv-highgui-dev
 
+sudo apt-get -y install python3-pip
+python -m pip install --user numpy scipy matplotlib ipython jupyter pandas sympy nose
+pip3 install -U scikit-learn scipy matplotlib
+
 //g++ main.cpp -o img-display `pkg-config --cflags --libs opencv`
-g++ app.cpp RimHistogramImageProcessor.cpp -o img_proc `pkg-config --cflags --libs opencv`
+//g++ app.cpp RimHistogramImageProcessor.cpp -o img_proc `pkg-config --cflags --libs opencv`
+g++ app.cpp RimHistogramImageProcessor.cpp -I external/json/single_include/ -o img_proc `pkg-config --cflags --libs opencv`
 - new source under machine learning
 
 //cheat commit
@@ -36,3 +41,4 @@ https://www.youtube.com/watch?v=A4UDOAOTRdw
 It is time to start to learn something about machine learning.
 
 https://www.hindawi.com/journals/mpe/2015/367879/?fbclid=IwAR2jCIfOJ_Uwqtdut7qIxDnAIcYWmtgo94Ri6XA4sRB6eGAmSS5BUwGccE0 - post stamps recognition
+https://machinelearningmastery.com/machine-learning-in-python-step-by-step/

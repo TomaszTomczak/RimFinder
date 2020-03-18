@@ -29,51 +29,47 @@ void RimHistogramImageProcessor::process()
     cv::normalize(src_grayscale, src_grayscale, 0, 255, NORM_MINMAX);
     image->data = calculateHistogramInCircleArea(src_grayscale, rimEdge);
     image->processed = true;
-    cv::imshow("normalized greyscale" + image->path, src_grayscale);
-    cv::imshow("original" + image->path, src);
-    Alg::drawHistogram(image->data);
+    //cv::imshow("normalized greyscale" + image->path, src_grayscale);
+    //cv::imshow("original" + image->path, src);
+    //Alg::drawHistogram(image->data);
     }
   }
 
   std::string RimHistogramImageProcessor::getProcessedData() 
   {
-    json j;
-    std::ostringstream oss;
-     // it will be json in the future
-      // https://github.com/nlohmann/json
-    //json data = json::array([1,2,3,4]);
-
-   /* json jj;
-    jj["name"] = "nazwa";
-    jj["dane"] = {1,2,3,4,5,6,6};
-    j["items"].push_back(jj);
-    j["items"].push_back("data2");
-    j["items"].push_back("data3");*/
-
+      std::ostringstream retVal;
+   /* json j;
     for(auto& i : images)
     {
         json tmp;
-        json data;
         tmp["name"] = i->path;
-        /*oss<<"Path: ";
-        oss<<i->path;
-        oss<<"\n";  
-        oss<<"Data: [";*/
         for(int x =0; x<256; x++)
         {
-            //oss<<i->data[x]<<" ";
             tmp["data"].push_back(i->data[x]);
-        }       /*
-        oss<<"]\n";*/
+        }       
         j["items"].push_back(tmp);
     }
 
-    return j.dump();
+    return j.dump();*/
+
+   
+    for(auto& i : images)
+    {
+        for(int x =0; x<256; x++)
+        {
+              retVal<<i->data[x]<<",";
+                     
+        }       
+        retVal<<i->path<<"\n";
+    }
+
+    return retVal.str();
   };
 
-  int* RimHistogramImageProcessor::calculateHistogramInCircleArea(const cv::Mat1b &image, const cv::Vec3f &circle)
+  double* RimHistogramImageProcessor::calculateHistogramInCircleArea(const cv::Mat1b &image, const cv::Vec3f &circle)
   {
-    int *histogram = new int[256];
+    double *histogram = new double[256];
+    int totalPixels = image.rows*image.cols;
 
     for (int i = 0; i < 256; i++)
     {
@@ -91,5 +87,10 @@ void RimHistogramImageProcessor::process()
       }
     }
 
+    for (int i = 0; i < 256; i++)
+    {
+      histogram[i] = (histogram[i]*100)/totalPixels; //percentage of whole image
+    }
+    
     return histogram;
   }
